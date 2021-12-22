@@ -73,4 +73,6 @@ private:
 		XMMATRIX proj;
 	};
 
+
+	int size;
 };

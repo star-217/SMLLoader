@@ -44,6 +44,7 @@ void MainScene::LoadAssets()
 	vertices[2].pos = Vector3(1, 1, 0);
 	vertices[2].uv = Vector2(1, 1);
 
+	size = sizeof(vertices);
 
 	descHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
 	texHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
@@ -157,16 +158,21 @@ void MainScene::LoadAssets()
 	DXTK->Device->CreateConstantBufferView(&cbv_desc, desc_addr);
 
 
-	D3D12_DESCRIPTOR_RANGE descRange = {};
-	descRange.NumDescriptors = 1;
-	descRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-	descRange.BaseShaderRegister = 0;
-	descRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	D3D12_DESCRIPTOR_RANGE descRange[2] = {};
+	descRange[0].NumDescriptors = 1;
+	descRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	descRange[0].BaseShaderRegister = 0;
+	descRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	descRange[1].NumDescriptors = 1;
+	descRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descRange[1].BaseShaderRegister = 0;
+	descRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_ROOT_PARAMETER rootPram = {};
 	rootPram.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootPram.DescriptorTable.pDescriptorRanges = &descRange;
-	rootPram.DescriptorTable.NumDescriptorRanges = 1;
+	rootPram.DescriptorTable.pDescriptorRanges = descRange;
+	rootPram.DescriptorTable.NumDescriptorRanges = 2;
 	rootPram.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC samplerDesc = {};
@@ -322,7 +328,13 @@ void MainScene::Render()
 	ID3D12DescriptorHeap* heaps = descHeaps->Heap();
 	DXTK->CommandList->SetDescriptorHeaps(1, &heaps);
 	DXTK->CommandList->SetGraphicsRootDescriptorTable(0, descHeaps->GetGpuHandle(0));
-	DXTK->CommandList->DrawIndexedInstanced(sml.GetVertex().size(), 1, 0, 0, 0);
+
+	heaps = texHeaps->Heap();
+	DXTK->CommandList->SetDescriptorHeaps(1, &heaps);
+	DXTK->CommandList->SetGraphicsRootDescriptorTable(1, texHeaps->GetGpuHandle(0));
+	DXTK->CommandList->DrawIndexedInstanced(size, 1, 0, 0, 0);
+
+
 
 	DXTK->ExecuteCommandList();
 }
