@@ -12,14 +12,15 @@ cbuffer cbuff: register(b0) {
 	matrix proj;
 }
 
-VSOUT BasicVS(float4 pos : POSITION, float4 normal : NORMAL)
+VSOUT BasicVS(float4 pos : POSITION, float2 uv : TEXCOORD)
 {
 	VSOUT vsout;
 	vsout.svpos = mul(world, pos);
 	vsout.svpos = mul(view, vsout.svpos);
 	vsout.svpos = mul(proj, vsout.svpos);
 
-	vsout.normal = mul(world, normal);
+	//vsout.normal = mul(world, normal);
+	vsout.uv = uv;
 
 	return vsout;
 }

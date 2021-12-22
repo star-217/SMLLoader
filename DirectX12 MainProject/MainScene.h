@@ -11,6 +11,7 @@ using Microsoft::WRL::ComPtr;
 using std::unique_ptr;
 using std::make_unique;
 using namespace DirectX;
+using namespace SimpleMath;
 
 class MainScene final : public Scene {
 public:
@@ -38,7 +39,16 @@ public:
 private:
 	SMLFile sml;
 
+	struct Tex
+	{
+		Vector3 pos;
+		Vector2 uv;
+	};
+
 	unique_ptr<DescriptorHeap> descHeaps;
+	unique_ptr<DescriptorHeap> texHeaps;
+
+	ComPtr<ID3D12Resource> texture;
 
 	ComPtr<ID3D12Resource> vertexbuffer;
 	D3D12_VERTEX_BUFFER_VIEW vbView;

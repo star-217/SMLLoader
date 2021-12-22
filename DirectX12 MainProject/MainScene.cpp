@@ -34,9 +34,28 @@ void MainScene::LoadAssets()
 {
 	sml.Load("mori.sml");
 
-	auto vertices = sml.GetVertex();
+	//auto vertices = sml.GetVertex();
+	std::vector<Tex> vertices;
+	vertices.resize(3);
+	vertices[0].pos = Vector3(0, 0, 0);
+	vertices[0].uv = Vector2(0, 0);
+	vertices[1].pos = Vector3(0, 1, 0);
+	vertices[1].uv = Vector2(0, 1);
+	vertices[2].pos = Vector3(1, 1, 0);
+	vertices[2].uv = Vector2(1, 1);
+
 
 	descHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
+	texHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
+
+
+	ResourceUploadBatch resourceUpload(DXTK->Device);
+	resourceUpload.Begin();
+
+	DX12::CreateTextureSRV(DXTK->Device, L"name.png", resourceUpload, texHeaps.get(), 0, texture.ReleaseAndGetAddressOf());
+
+	auto uploadResourcesFinished = resourceUpload.End(DXTK->CommandQueue);
+	uploadResourcesFinished.wait();
 
 	D3D12_HEAP_PROPERTIES heapProp = {};
 	heapProp.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -73,7 +92,9 @@ void MainScene::LoadAssets()
 	vbView.SizeInBytes = sizeof(vertices[0]) * vertices.size();
 	vbView.StrideInBytes = sizeof(vertices[0]);
 
-	auto indexData = sml.GetIndex();
+	//auto indexData = sml.GetIndex();
+
+	std::vector<int> indexData = { 0,1,2};
 
 	resDesc.Width = sizeof(indexData[0]) * indexData.size();
 
@@ -211,7 +232,8 @@ void MainScene::LoadAssets()
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
 		{"POSITION",0, DXGI_FORMAT_R32G32B32_FLOAT,0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{"NORMAL",0, DXGI_FORMAT_R32G32B32_FLOAT,0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{"TEXCOORD",0, DXGI_FORMAT_R32G32_FLOAT,0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		/*{"NORMAL",0, DXGI_FORMAT_R32G32B32_FLOAT,0, D3D12_APPEND_ALIGNED_ELEMENT,D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},*/
 	};
 	gpipeline.InputLayout.pInputElementDescs = inputLayout;
 	gpipeline.InputLayout.NumElements = _countof(inputLayout);
