@@ -14,5 +14,5 @@ float4 BasicPS(VSOUT input) : SV_TARGET
 	//float brightness = max(dot(-light, input.normal), 0.0f);
 	//brightness = min(brightness + 0.25f, 1.0f);
 
-	return float4(1,1,1,1);
+	return float4(1,1,1,1) * tex.Sample(samp,input.uv);
 }

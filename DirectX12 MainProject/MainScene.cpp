@@ -36,24 +36,31 @@ void MainScene::LoadAssets()
 
 	//auto vertices = sml.GetVertex();
 	std::vector<Tex> vertices;
-	vertices.resize(3);
+	vertices.resize(4);
 	vertices[0].pos = Vector3(0, 0, 0);
-	vertices[0].uv = Vector2(0, 0);
-	vertices[1].pos = Vector3(0, 1, 0);
-	vertices[1].uv = Vector2(0, 1);
-	vertices[2].pos = Vector3(1, 1, 0);
-	vertices[2].uv = Vector2(1, 1);
+	vertices[0].uv = Vector2(0, 1);
+	vertices[1].pos = Vector3(0, 5, 0);
+	vertices[1].uv = Vector2(0, 0);
+	vertices[2].pos = Vector3(5, 5, 0);
+	vertices[2].uv = Vector2(1, 0);
+
+	vertices[3].pos = Vector3(5, 0, 0);
+	vertices[3].uv = Vector2(1, 1);
+	//vertices[4].pos = Vector3(5, 0, 0);
+	//vertices[4].uv = Vector2(1, 1);
+	//vertices[5].pos = Vector3(0, 0, 0);
+	//vertices[5].uv = Vector2(0, 1);
 
 	size = sizeof(vertices);
 
-	descHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
-	texHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
+	descHeaps = make_unique<DescriptorHeap>(DXTK->Device, 2);
+	//texHeaps = make_unique<DescriptorHeap>(DXTK->Device, 1);
 
 
 	ResourceUploadBatch resourceUpload(DXTK->Device);
 	resourceUpload.Begin();
 
-	DX12::CreateTextureSRV(DXTK->Device, L"name.png", resourceUpload, texHeaps.get(), 0, texture.ReleaseAndGetAddressOf());
+	DX12::CreateTextureSRV(DXTK->Device, L"name.png", resourceUpload, descHeaps.get(), 1, texture.ReleaseAndGetAddressOf());
 
 	auto uploadResourcesFinished = resourceUpload.End(DXTK->CommandQueue);
 	uploadResourcesFinished.wait();
@@ -95,7 +102,7 @@ void MainScene::LoadAssets()
 
 	//auto indexData = sml.GetIndex();
 
-	std::vector<int> indexData = { 0,1,2};
+	std::vector<int> indexData = { 0,1,2,0,2,3};
 
 	resDesc.Width = sizeof(indexData[0]) * indexData.size();
 
@@ -292,7 +299,7 @@ NextScene MainScene::Update(const float deltaTime)
 	auto scale = SimpleMath::Matrix::CreateScale(1, 1, 1);
 
 	auto rote = SimpleMath::Matrix::CreateFromYawPitchRoll(
-		XMConvertToRadians(180),
+		XMConvertToRadians(0),
 		XMConvertToRadians(0),
 		XMConvertToRadians(0)
 	); ;
@@ -329,10 +336,7 @@ void MainScene::Render()
 	DXTK->CommandList->SetDescriptorHeaps(1, &heaps);
 	DXTK->CommandList->SetGraphicsRootDescriptorTable(0, descHeaps->GetGpuHandle(0));
 
-	heaps = texHeaps->Heap();
-	DXTK->CommandList->SetDescriptorHeaps(1, &heaps);
-	DXTK->CommandList->SetGraphicsRootDescriptorTable(1, texHeaps->GetGpuHandle(0));
-	DXTK->CommandList->DrawIndexedInstanced(size, 1, 0, 0, 0);
+	DXTK->CommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 
 
